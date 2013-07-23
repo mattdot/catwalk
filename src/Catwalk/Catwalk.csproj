@@ -37,6 +37,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ModelProperty.cs" />
+    <Compile Include="ObservableCommand.cs" />
     <Compile Include="ObservableModel.cs" />
     <Compile Include="ObservablePropertyExpressionVisitor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

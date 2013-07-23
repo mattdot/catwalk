@@ -6,6 +6,7 @@ using System.Linq.Expressions;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Input;
 
 namespace Catwalk
 {
@@ -114,6 +115,22 @@ namespace Catwalk
             return ((Func<T>)f)();
         }
 
+        protected ICommand Command(Action<object> execute, [CallerMemberName]string key = "")
+        {
+            return Command(null, execute, key);
+        }
+
+        protected ICommand Command(Expression<Func<object, bool>> canExecute, Action<object> execute, [CallerMemberName]string key = "")
+        {
+            object cmd;
+            if (!this.values.TryGetValue(key, out cmd))
+            {
+                cmd = this.values[key] = new ObservableCommand(canExecute, execute);
+            }
+
+            return (ICommand)cmd;
+        }
+
         /// <summary>
         /// 
         /// </summary>
@@ -134,12 +151,5 @@ namespace Catwalk
             return true;
         }
 
-        private IEnumerable<ModelProperty> PropertyGraph<T>(Expression expr)
-        {
-            var visitor = new ObservablePropertyExpressionVisitor(this.GetType());
-            visitor.Visit(expr);
-
-            return visitor.Properties;
-        }
     }
 }
