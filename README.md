@@ -1,13 +1,12 @@
 catwalk
 =======
 
-Catwalk a simple MVVM framework.  It's the perfect foundation to showcase your Models and ViewModels.  It's designed to be a modern MVVM framework that utilizes features in C#5 to simplify creating modern MVVM apps.  Catwalk is implemented as a Portable Class Library (PCL) so it's usable on Windows Phone, Windows Store apps, and .NET 4.5.
+Catwalk a simple portable MVVM framework.  It's the perfect foundation to showcase your Models and ViewModels.  It's designed to be a modern MVVM framework that utilizes features in C#5 to simplify creating modern MVVM apps.  Catwalk is implemented as a Portable Class Library (PCL) so it's usable on Windows Phone 8, Windows Store apps, and .NET 4.5.
 
 Observable Properties
 =======
-    ///<summary>
-    /// A basic model that will raise INotifyPropertyChanged.PropertyChanged events
-    ///</summary>
+The ObservableModel base class will automatically raise INotifyPropertyChanged.PropertyChanged events when you call SetValue.
+
     public class SampleModel : ObservableModel
     {
       public string FirstName
@@ -23,9 +22,9 @@ Observable Properties
       }
     }
   
-calculated properties
+Calculated Properties
 ======
-Calculated properties are read-only properties that are computed based on other observable properties.  A calculated property raises a PropertyChanged event when the underlying properties it references change.
+Calculated properties are read-only properties that are computed based on other observable properties.  The Observable Model base class raises a PropertyChanged event for calculated properties when the referenced properties change.
 
     public class SampleModel : ObservableModel
     {
@@ -50,9 +49,9 @@ Calculated properties are read-only properties that are computed based on other 
       }
     }
     
-commands
+Commands
 ======
-Commands can be created, and their CanExecute state will automatically change when underlying observable properties change.
+Commands can be created by calling the base class' Command function. The base class creates an ObservableCommand, which will raise the ICommand.CanExecuteChanged automatically when any referenced observable properties change.
 
     public class SampleModel : ObservableModel
     {
@@ -60,9 +59,12 @@ Commands can be created, and their CanExecute state will automatically change wh
       {
         get
         {
-          return Command(() => this.FirstName != null, () => {
-            //do some save logic here
-          });
+          return Command(
+              (p) => this.FirstName != null, //the condition for CanExecute 
+              (p) => {
+                //do some save logic here
+              }
+          );
         }
       }
     }
@@ -76,10 +78,11 @@ Sometimes you need to do something async in a command, so you can do it like thi
         get
         {
           return Command(
-            () => this.FirstName != null,  //the condition for CanExecute 
-            async () => {
-            //do some save logic here
-          });
+            (p) => this.FirstName != null,  //the condition for CanExecute 
+            async (p) => {
+                //do some save logic here
+            }
+          );
         }
       }
     }
