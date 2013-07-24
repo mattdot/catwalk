@@ -12,23 +12,80 @@ namespace Catwalk
 {
     public delegate T CalculateFunc<T>(params object[] values);
 
+    public class ModelPropertyInfo
+    {
+        private List<ModelProperty> depends = new List<ModelProperty>();
+        public IEnumerable<ModelProperty> Dependencies
+        {
+            get
+            {
+                return this.depends.AsEnumerable();
+            }
+        }
+
+        internal bool AddDependency(ModelProperty prop)
+        {
+            if (!this.Dependencies.Contains(prop))
+            {
+                this.depends.Add(prop);
+
+                return true;
+            }
+
+            return false;
+        }
+
+        public object DefaultValue { get; set; }
+    }
+
     public abstract class ObservableModel : INotifyPropertyChanged
     {
-        private static HashSet<ModelProperty> propertySet;
+        //metadata is stored statically so we don't duplicate per instance.
+        private static IDictionary<ModelProperty, ModelPropertyInfo> metadata;
 
-        private IDictionary<string, ModelProperty> properties;
+        //a dictionary that stores all the values of the properties.
         private IDictionary<string, object> values;
         private ObservablePropertyExpressionVisitor visitor;
+        private Type type;
 
         static ObservableModel()
         {
-            propertySet = new HashSet<ModelProperty>();
+            ObservableModel.metadata = new Dictionary<ModelProperty, ModelPropertyInfo>();
         }
 
-        public ObservableModel()
+        private static ModelPropertyInfo EnsurePropertyInfo(ModelProperty property, Func<ModelPropertyInfo> factory = null)
         {
-            this.properties = new Dictionary<string, ModelProperty>();
+            if (null == factory)
+            {
+                factory = () => new ModelPropertyInfo();
+            }
+
+            ModelPropertyInfo meta;
+            if (!ObservableModel.metadata.TryGetValue(property, out meta))
+            {
+                lock (ObservableModel.metadata)
+                {
+                    if (!ObservableModel.metadata.TryGetValue(property, out meta))
+                    {
+                        meta = ObservableModel.metadata[property] = factory();
+                    }
+                }
+            }
+
+            return meta;
+        }
+
+        private static void SubscribeToProperty(ModelProperty publisher, ModelProperty subscriber)
+        {
+            var info = ObservableModel.EnsurePropertyInfo(publisher);
+            info.AddDependency(subscriber);
+        }
+
+        protected ObservableModel()
+        {
+            //this.properties = new Dictionary<string, ModelProperty>();
             this.values = new Dictionary<string, object>();
+            this.type = this.GetType();
 
             this.visitor = new ObservablePropertyExpressionVisitor(this.GetType());
         }
@@ -42,25 +99,25 @@ namespace Catwalk
         /// Used in property setters to set the value.
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        /// <param name="key"></param>
+        /// <param name="propertyName"></param>
         /// <param name="value"></param>
-        protected void SetValue<T>(T value, [CallerMemberName]string key = "")
+        protected void SetValue<T>(T value, [CallerMemberName]string propertyName = "")
         {
-            ModelProperty prop;
-            EnsureProperty<T>(key, out prop);
+            this.values[propertyName] = value;
 
-            this.values[prop.Name] = value;
-
-            RaisePropertyChanged(prop);
+            RaisePropertyChanged(new ModelProperty(propertyName, typeof(T), this.type));
         }
 
-        protected void RaisePropertyChanged(ModelProperty prop)
+        protected void RaisePropertyChanged(ModelProperty property)
         {
             if (null != this.PropertyChanged)
             {
-                this.PropertyChanged(this, new PropertyChangedEventArgs(prop.Name));
+                //raise the property changed event for the property
+                this.PropertyChanged(this, new PropertyChangedEventArgs(property.Name));
 
-                foreach (var dep in prop.Dependencies)
+                //raise the property changed event for all subscribed properties
+                var propMeta = ObservableModel.EnsurePropertyInfo(property);
+                foreach (var dep in propMeta.Dependencies)
                 {
                     RaisePropertyChanged(dep);
                 }
@@ -70,16 +127,13 @@ namespace Catwalk
         /// <summary>
         /// Used in property getters
         /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="key"></param>
-        /// <returns></returns>
-        protected T GetValue<T>([CallerMemberName]string key = "")
+        /// <typeparam name="T">The type of the property</typeparam>
+        /// <param name="propertyName">The name of the property.  This should be automatically set by the compiler.</param>
+        /// <returns>Returns the current value of the property, or the default value.</returns>
+        protected T GetValue<T>([CallerMemberName]string propertyName = "")
         {
-            ModelProperty prop;
-            EnsureProperty<T>(key, out prop);
-
             object value;
-            if (!this.values.TryGetValue(key, out value))
+            if (!this.values.TryGetValue(propertyName, out value))
             {
                 return default(T);
             }
@@ -87,11 +141,30 @@ namespace Catwalk
             return (T)value;
         }
 
-        protected T Calculated<T>(Expression<Func<T>> expr, [CallerMemberName]string key = "")
+        /// <summary>
+        /// Calculated properties are read-only properties that are computed based on other 
+        /// observable properties. The Observable Model base class raises a PropertyChanged 
+        /// event for calculated properties when the referenced properties change.
+        /// </summary>
+        /// <typeparam name="T">The type of the calculated result</typeparam>
+        /// <param name="expr">A lambda expression that returns the value of the property.</param>
+        /// <param name="propertyName">The name of the property. This should be filled in automatically by the compiler.</param>
+        /// <returns>The calculated value of the property</returns>
+        /// <example>
+        /// <code>
+        /// public string FullName
+        /// {
+        ///     get
+        ///     {
+        ///         return Calculated(() => this.FirstName + " " + this.LastName);
+        ///     }
+        /// }
+        /// </code></example>
+        protected T Calculated<T>(Expression<Func<T>> expr, [CallerMemberName]string propertyName = "")
         {
-            ModelProperty prop;
+            var prop = new ModelProperty(propertyName, typeof(T), this.type);
 
-            if (!EnsureProperty<T>(key, out prop))
+            ObservableModel.EnsurePropertyInfo(prop, () =>
             {
                 var visitor = new ObservablePropertyExpressionVisitor(this.GetType());
                 visitor.NotifyAction = () => { RaisePropertyChanged(prop); };
@@ -99,11 +172,11 @@ namespace Catwalk
                 var graph = visitor.Properties.ToList();
                 foreach (var item in graph)
                 {
-                    ModelProperty dp;
-                    EnsureProperty<T>(item.Name, out dp);
-                    dp.AddDependency(prop);
+                    ObservableModel.SubscribeToProperty(item, prop);
                 }
-            }
+
+                return new ModelPropertyInfo();
+            });
 
             object f;
             if (!this.values.TryGetValue(prop.Name, out f))
@@ -115,41 +188,20 @@ namespace Catwalk
             return ((Func<T>)f)();
         }
 
-        protected ICommand Command(Action<object> execute, [CallerMemberName]string key = "")
+        protected ICommand Command(Action<object> execute, [CallerMemberName]string propertyName = "")
         {
-            return Command(null, execute, key);
+            return Command(null, execute, propertyName);
         }
 
-        protected ICommand Command(Expression<Func<object, bool>> canExecute, Action<object> execute, [CallerMemberName]string key = "")
+        protected ICommand Command(Expression<Func<object, bool>> canExecute, Action<object> execute, [CallerMemberName]string propertyName = "")
         {
             object cmd;
-            if (!this.values.TryGetValue(key, out cmd))
+            if (!this.values.TryGetValue(propertyName, out cmd))
             {
-                cmd = this.values[key] = new ObservableCommand(canExecute, execute);
+                cmd = this.values[propertyName] = new ObservableCommand(canExecute, execute);
             }
 
             return (ICommand)cmd;
         }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="key"></param>
-        /// <param name="prop"></param>
-        /// <returns>true if property existed previous to call; otherwise false</returns>
-        private bool EnsureProperty<T>(string key, out ModelProperty prop)
-        {
-            if (!this.properties.TryGetValue(key, out prop))
-            {
-                prop = new ModelProperty(key, typeof(T), this.GetType());
-                this.properties.Add(key, prop);
-
-                return false;
-            }
-
-            return true;
-        }
-
     }
 }

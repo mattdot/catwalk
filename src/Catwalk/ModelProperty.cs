@@ -8,7 +8,7 @@ namespace Catwalk
 {
     public sealed class ModelProperty
     {
-        private List<ModelProperty> depends = new List<ModelProperty>();
+
         private readonly string name;
         private readonly Type type;
         private readonly Type owner;
@@ -61,20 +61,6 @@ namespace Catwalk
         public Type Type { get { return this.type; } }
         public Type Owner { get { return this.owner; } }
 
-        public IEnumerable<ModelProperty> Dependencies
-        {
-            get
-            {
-                return this.depends.AsEnumerable();
-            }
-        }
 
-        internal void AddDependency(ModelProperty prop)
-        {
-            if (!this.Dependencies.Contains(prop))
-            {
-                this.depends.Add(prop);
-            }
-        }
     }
 }

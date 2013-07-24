@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<CodeSnippets
+    xmlns="http://schemas.microsoft.com/VisualStudio/2005/CodeSnippet">
+    <CodeSnippet Format="1.0.0">
+        <Header>
+            <Title>Observable Property</Title>
+            <Description>This snippet creates an observable property declaration for Catwalk.</Description>
+            <Shortcut>propo</Shortcut>
+        </Header>
+        <Snippet>
+          <Declarations>
+            <Literal Editable="true">
+              <ID>PropType</ID>
+              <Default>string</Default>  
+            </Literal>
+            <Literal Editable="true">
+              <ID>PropName</ID>
+              <Default>string</Default>
+            </Literal>
+          </Declarations>
+            <Code Language="C#">
+                <![CDATA[
+                public $PropType$ $PropName$
+                {
+                  get { return GetValue<$PropType$>(); }
+                  set { SetValue(value); }
+                }
+                ]]>
+            </Code>
+        </Snippet>
+    </CodeSnippet>
+</CodeSnippets>

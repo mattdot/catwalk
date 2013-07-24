@@ -9,6 +9,11 @@ using System.Reflection;
 
 namespace Catwalk
 {
+    /// <summary>
+    /// The ObservablePropertyExpressionVisitor finds all properties of objects which implement
+    /// INotifyPropertyChanged and adds an event handler which chains the notification to the 
+    /// NotifyAction delegate.
+    /// </summary>
     internal sealed class ObservablePropertyExpressionVisitor : ExpressionVisitor
     {
         //public properties
