@@ -1,0 +1,1 @@
+nuget pack Catwalk\Catwalk.csproj -Build -Prop Configuration=Release -OutputDirectory ..\deploy\ -Symbols
