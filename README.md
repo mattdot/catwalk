@@ -1,7 +1,7 @@
 catwalk
 =======
 
-Catwalk a simple portable MVVM framework.  It's the perfect foundation to showcase your Models and ViewModels.  It's designed to be a modern MVVM framework that utilizes features in C#5 to simplify creating modern MVVM apps.  Catwalk is implemented as a Portable Class Library (PCL) so it's usable on Windows Phone 8, Windows Store apps, and .NET 4.5.
+Catwalk is a simple portable MVVM framework.  It's the perfect foundation to showcase your Models and ViewModels.  It's designed to be a modern MVVM framework that utilizes features in C#5 to simplify creating modern MVVM apps.  Catwalk is implemented as a Portable Class Library (PCL) so it's usable on Windows Phone 8, Windows Store apps, and .NET 4.5.
 
 Observable Properties
 =======
