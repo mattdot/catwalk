@@ -17,6 +17,14 @@ namespace Catwalk.Tests
             model.A = 2;
             model.B = 3;
             CollectionAssert.Contains(propertiesThatChanged, "C");
+
+            propertiesThatChanged.Clear();
+            model = new SelfReferencingModel();
+            model.PropertyChanged += (s, e) => { propertiesThatChanged.Add(e.PropertyName); };
+            var y = model.C;
+            model.A = 2;
+            model.B = 3;
+            CollectionAssert.Contains(propertiesThatChanged, "C");
         }
 
         [TestMethod]
@@ -39,6 +47,17 @@ namespace Catwalk.Tests
             r.PropertyChanged += (sender, e) => { notifications.Add(e.PropertyName); };
 
             var foo = r.Reference;
+            //setting source should trigger a notification for referencing property
+            s.Source = 99;
+
+            CollectionAssert.Contains(notifications, "Reference");
+            /////////////////////////
+            notifications.Clear();
+            s = new SourceModel();
+            r = new RefModel(s);
+            r.PropertyChanged += (sender, e) => { notifications.Add(e.PropertyName); };
+
+            foo = r.Reference;
             //setting source should trigger a notification for referencing property
             s.Source = 99;
 

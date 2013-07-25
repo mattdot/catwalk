@@ -164,7 +164,10 @@ namespace Catwalk
         {
             var prop = new ModelProperty(propertyName, typeof(T), this.type);
 
-            ObservableModel.EnsurePropertyInfo(prop, () =>
+            ObservableModel.EnsurePropertyInfo(prop);
+
+            object f;
+            if (!this.values.TryGetValue(prop.Name, out f))
             {
                 var visitor = new ObservablePropertyExpressionVisitor(this.GetType());
                 visitor.NotifyAction = () => { RaisePropertyChanged(prop); };
@@ -175,12 +178,6 @@ namespace Catwalk
                     ObservableModel.SubscribeToProperty(item, prop);
                 }
 
-                return new ModelPropertyInfo();
-            });
-
-            object f;
-            if (!this.values.TryGetValue(prop.Name, out f))
-            {
                 //cache the compiled version of this property
                 f = this.values[prop.Name] = expr.Compile();
             }
