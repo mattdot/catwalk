@@ -1,34 +1,41 @@
 <?xml version="1.0" encoding="utf-8"?>
 <CodeSnippets
     xmlns="http://schemas.microsoft.com/VisualStudio/2005/CodeSnippet">
-    <CodeSnippet Format="1.0.0">
-        <Header>
-            <Title>Calculated Property</Title>
-            <Description>This snippet creates a calculated property declaration for Catwalk.</Description>
-            <Shortcut>propc</Shortcut>
-        </Header>
-        <Snippet>
-          <Declarations>
-            <Literal Editable="true">
-              <ID>PropType</ID>
-              <Default>string</Default>  
-            </Literal>
-            <Literal Editable="true">
-              <ID>PropName</ID>
-              <Default>string</Default>
-            </Literal>
-          </Declarations>
-            <Code Language="C#">
-                <![CDATA[
-                public $PropType$ $PropName$
-                {
-                  get 
-                  { 
-                    return Calculated(() => $end$);
-                  }
-                }
-                ]]>
-            </Code>
-        </Snippet>
-    </CodeSnippet>
+  <CodeSnippet Format="1.0.0">
+    <Header>
+      <Title>Calculated Property</Title>
+      <Author>Matt Dotson</Author>
+      <Description>This snippet creates a calculated property declaration for Catwalk.</Description>
+      <Shortcut>propc</Shortcut>
+      <SnippetTypes>
+        <SnippetType>Expansion</SnippetType>
+      </SnippetTypes>
+    </Header>
+    <Snippet>
+      <Declarations>
+        <Literal Editable="true">
+          <ID>PropName</ID>
+          <Default>PropertyName</Default>
+        </Literal>
+        <Literal Editable="true">
+          <ID>PropType</ID>
+          <Default>string</Default>
+        </Literal>
+        <Literal Editable="true">
+          <ID>PropExpr</ID>
+          <Default></Default>
+        </Literal>
+      </Declarations>
+      <Code Language="csharp">
+        <![CDATA[public $PropType$ $PropName$
+        {
+          get 
+          { 
+            return Calculated(() => $PropExpr$);
+          }
+        }
+        $end$]]>
+      </Code>
+    </Snippet>
+  </CodeSnippet>
 </CodeSnippets>

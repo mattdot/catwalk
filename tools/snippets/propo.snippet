@@ -15,16 +15,16 @@
             </Literal>
             <Literal Editable="true">
               <ID>PropName</ID>
-              <Default>string</Default>
+              <Default></Default>
             </Literal>
           </Declarations>
-            <Code Language="C#">
-                <![CDATA[
-                public $PropType$ $PropName$
-                {
-                  get { return GetValue<$PropType$>(); }
-                  set { SetValue(value); }
-                }
+            <Code Language="csharp">
+                <![CDATA[public $PropType$ $PropName$
+        {
+          get { return GetValue<$PropType$>(); }
+          set { SetValue(value); }
+        }
+        $end$
                 ]]>
             </Code>
         </Snippet>

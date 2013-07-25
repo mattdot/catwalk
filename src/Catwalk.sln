@@ -5,6 +5,13 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Catwalk", "catwalk\Catwalk.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Catwalk.Tests", "Catwalk.Tests\Catwalk.Tests.csproj", "{0C5DD579-7271-4FB1-8E3F-46379469F292}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Snippets", "Snippets", "{21C4BA59-B927-44D7-980D-804A1F2539B6}"
+	ProjectSection(SolutionItems) = preProject
+		..\tools\snippets\commando.snippet = ..\tools\snippets\commando.snippet
+		..\tools\snippets\propc.snippet = ..\tools\snippets\propc.snippet
+		..\tools\snippets\propo.snippet = ..\tools\snippets\propo.snippet
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

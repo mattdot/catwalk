@@ -203,5 +203,10 @@ namespace Catwalk
 
             return (ICommand)cmd;
         }
+
+        protected void Compile<T>(Func<T> propertyExpression)
+        {
+            propertyExpression();
+        }
     }
 }
