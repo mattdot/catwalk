@@ -20,6 +20,17 @@ namespace Catwalk.Tests
         }
 
         [TestMethod]
+        public void SelfRefTest2()
+        {
+            var propertiesThatChanged = new List<string>();
+            var model = new SelfReferencingModel(true);
+            model.PropertyChanged += (s, e) => { propertiesThatChanged.Add(e.PropertyName); };
+            model.A = 2;
+            model.B = 3;
+            CollectionAssert.Contains(propertiesThatChanged, "C");
+        }
+
+        [TestMethod]
         public void ExternalRefTest1()
         {
             List<string> notifications = new List<string>();
@@ -37,6 +48,14 @@ namespace Catwalk.Tests
 
     public class SelfReferencingModel : ObservableModel
     {
+        public SelfReferencingModel(bool compile = false)
+        {
+            if (compile)
+            {
+                Compile(() => this.C);
+            }
+        }
+
         public int A
         {
             get

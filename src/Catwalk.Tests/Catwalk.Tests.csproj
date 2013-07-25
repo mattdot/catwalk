@@ -59,6 +59,7 @@
     <Compile Include="CalculatedTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="DefaultTests.cs" />
+    <Compile Include="CommandTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\catwalk\Catwalk.csproj">

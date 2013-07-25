@@ -62,7 +62,10 @@ namespace Catwalk
 
         public void Execute(object parameter)
         {
-            this.execute(parameter);
+            if (this.canExecute(parameter))
+            {
+                this.execute(parameter);
+            }
         }
 
         private void RaiseCanExecuteChanged(EventArgs e)

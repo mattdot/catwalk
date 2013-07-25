@@ -1,5 +1,6 @@
 ﻿using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.ComponentModel;
 
 namespace Catwalk.Tests
 {
@@ -7,8 +8,11 @@ namespace Catwalk.Tests
     public class DefaultTests
     {
         [TestMethod]
-        public void TestMethod1()
+        public void DefaultValueTest()
         {
+            var model = new DefaultModel();
+
+            Assert.AreEqual<string>("Hello", model.Foo);
         }
     }
 
@@ -16,9 +20,10 @@ namespace Catwalk.Tests
     {
         public DefaultModel()
         {
-            Compile(() => this.Fooc);
+            Compile(() => new[] { this.Fooc, this.Foo });
         }
 
+        [DefaultValue("Hello")]
         public string Foo
         {
             get { return GetValue<string>(); }
