@@ -187,7 +187,7 @@ namespace Catwalk
 
         protected ICommand Command(Action<object> execute, [CallerMemberName]string propertyName = "")
         {
-            return Command(null, execute, propertyName);
+            return Command((p) => true, execute, propertyName);
         }
 
         protected ICommand Command(Expression<Func<object, bool>> canExecute, Action<object> execute, [CallerMemberName]string propertyName = "")
